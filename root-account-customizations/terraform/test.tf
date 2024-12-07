@@ -37,6 +37,12 @@ resource "null_resource" "assume_role_command" {
       export AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN
 
       aws sts get-caller-identity
+      if [[ -z ~/.aws/config ]]; then
+        cat ~/.aws/config
+      else
+        echo "~/.aws/config not found"
+      fi
+      
     EOF
 
     interpreter = ["/bin/bash", "-c"]
