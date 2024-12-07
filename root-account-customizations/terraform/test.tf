@@ -26,22 +26,19 @@ output "caller_user" {
 resource "null_resource" "assume_role_command" {
   provisioner "local-exec" {
     command = <<EOF
-      credentials=($(aws sts assume-role \
+
+      temp_role="$(aws sts assume-role \
         --role-arn "arn:aws:iam::195094525803:role/AWSAFTExecution" \
         --role-session-name "terraform-session-null-exec" \
         --query 'Credentials.[AccessKeyId,SecretAccessKey,SessionToken]' \
-        --output text))
+        --output text)"
 
-      unset PROFILE
-      export AWS_ACCESS_KEY_ID="${credentials[0]}"
-      export AWS_SECRET_ACCESS_KEY="${credentials[1]}"
-      export AWS_SESSION_TOKEN="${credentials[2]}"
-      unset credentials
-      
+      read AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN <<< $temp_role
+      export AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN
+
       aws sts get-caller-identity
     EOF
 
     interpreter = ["/bin/bash", "-c"]
   }
 }
-
