@@ -23,9 +23,11 @@ output "caller_user" {
 # }
 
 
-resource "null_resource" "assume_role_command2" {
+resource "null_resource" "assume_role_command3" {
   provisioner "local-exec" {
     command = <<EOF
+      echo "Environment:"
+      env
 
       temp_role="$(aws sts assume-role \
         --role-arn "arn:aws:iam::195094525803:role/AWSAFTExecution" \
@@ -37,11 +39,6 @@ resource "null_resource" "assume_role_command2" {
       export AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN
 
       aws sts get-caller-identity
-      if [[ -z ~/.aws/config ]]; then
-        cat ~/.aws/config
-      else
-        echo "~/.aws/config not found"
-      fi
       
     EOF
 
