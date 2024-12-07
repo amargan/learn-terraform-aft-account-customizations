@@ -23,7 +23,7 @@ output "caller_user" {
 # }
 
 
-resource "null_resource" "assume_role_command" {
+resource "null_resource" "assume_role_command2" {
   provisioner "local-exec" {
     command = <<EOF
 
