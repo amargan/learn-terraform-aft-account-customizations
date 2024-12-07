@@ -22,15 +22,19 @@ output "caller_user" {
 #   }
 # }
 
+#        --role-arn "arn:aws:iam::195094525803:role/AWSAFTExecution" \
 
-resource "null_resource" "assume_role_command3" {
+resource "null_resource" "assume_role_command4" {
   provisioner "local-exec" {
+    environment = {
+      CALLER_ARN = data.aws_caller_identity.current.arn
+    }
     command = <<EOF
-      echo "Environment:"
-      env
+      echo "Vended exec role arn: $VENDED_EXEC_ROLE_ARN"
+      echo "Caller ARN: $CALLER_ARN"
 
       temp_role="$(aws sts assume-role \
-        --role-arn "arn:aws:iam::195094525803:role/AWSAFTExecution" \
+        --role-arn "$VENDED_EXEC_ROLE_ARN"
         --role-session-name "terraform-session-null-exec" \
         --query 'Credentials.[AccessKeyId,SecretAccessKey,SessionToken]' \
         --output text)"
@@ -39,7 +43,7 @@ resource "null_resource" "assume_role_command3" {
       export AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN
 
       aws sts get-caller-identity
-      
+      unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN temp_role
     EOF
 
     interpreter = ["/bin/bash", "-c"]
