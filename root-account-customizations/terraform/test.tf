@@ -24,26 +24,26 @@ output "caller_user" {
 
 #        --role-arn "arn:aws:iam::195094525803:role/AWSAFTExecution" \
 
-resource "null_resource" "assume_role_command6" {
+resource "null_resource" "assume_role_command7" {
   provisioner "local-exec" {
     environment = {
       CALLER_ARN = data.aws_caller_identity.current.arn
     }
     command = <<EOF
-      echo "Vended exec role arn: $VENDED_EXEC_ROLE_ARN"
-      echo "Caller ARN: $CALLER_ARN"
-      env
-      temp_role="$(aws sts assume-role \
-        --role-arn "$VENDED_EXEC_ROLE_ARN" \
-        --role-session-name "terraform-session-null-exec" \
-        --query 'Credentials.[AccessKeyId,SecretAccessKey,SessionToken]' \
-        --output text)"
+      # echo "Vended exec role arn: $VENDED_EXEC_ROLE_ARN"
+      # echo "Caller ARN: $CALLER_ARN"
+      # env
+      # temp_role="$(aws sts assume-role \
+      #   --role-arn "$VENDED_EXEC_ROLE_ARN" \
+      #   --role-session-name "terraform-session-null-exec" \
+      #   --query 'Credentials.[AccessKeyId,SecretAccessKey,SessionToken]' \
+      #   --output text)"
 
-      read AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN <<< $temp_role
-      export AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN
+      # read AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN <<< $temp_role
+      # export AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN
 
-      aws sts get-caller-identity
-      unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN temp_role
+      aws --profile aft-target sts get-caller-identity
+      # unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN temp_role
     EOF
 
     interpreter = ["/bin/bash", "-c"]
