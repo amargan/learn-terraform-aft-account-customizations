@@ -24,7 +24,7 @@ output "caller_user" {
 
 #        --role-arn "arn:aws:iam::195094525803:role/AWSAFTExecution" \
 
-resource "null_resource" "assume_role_command4" {
+resource "null_resource" "assume_role_command6" {
   provisioner "local-exec" {
     environment = {
       CALLER_ARN = data.aws_caller_identity.current.arn
@@ -32,9 +32,9 @@ resource "null_resource" "assume_role_command4" {
     command = <<EOF
       echo "Vended exec role arn: $VENDED_EXEC_ROLE_ARN"
       echo "Caller ARN: $CALLER_ARN"
-
+      env
       temp_role="$(aws sts assume-role \
-        --role-arn "$VENDED_EXEC_ROLE_ARN"
+        --role-arn "$VENDED_EXEC_ROLE_ARN" \
         --role-session-name "terraform-session-null-exec" \
         --query 'Credentials.[AccessKeyId,SecretAccessKey,SessionToken]' \
         --output text)"
