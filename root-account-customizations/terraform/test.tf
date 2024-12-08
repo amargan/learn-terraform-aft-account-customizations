@@ -59,10 +59,10 @@ output "caller_user" {
 resource "null_resource" "example1" {
   provisioner "local-exec" {
     environment = {
-      AWS_PROFILE=aft-target
+      AWS_PROFILE = "aft-target"
     }
-    
+
     interpreter = ["/bin/bash", "-c"]
-    command = "aws sts get-caller-identity"
+    command     = "aws sts get-caller-identity"
   }
 }
