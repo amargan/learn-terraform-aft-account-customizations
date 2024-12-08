@@ -41,7 +41,7 @@ resource "aws_organizations_policy_attachment" "sandbox_whitelist_attachment_1" 
   }
 
   provisioner "local-exec" {
-    when = "destroy"
+    when = destroy
 
     environment = {
       AWS_PROFILE  = "aft-target"
