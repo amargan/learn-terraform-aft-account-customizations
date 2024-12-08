@@ -1,0 +1,147 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "DisableIAMConsoleUsers",
+      "Effect": "Deny",
+      "Action": [
+        "iam:ChangePassword",
+        "iam:CreateLoginProfile",
+        "iam:UpdateAccountPasswordPolicy",
+        "iam:UpdateLoginProfile"
+      ],
+      "Resource": "*",
+      "Condition": {
+        "ArnNotLike": {
+          "aws:PrincipalARN": [
+            "arn:aws:iam::*:role/AWSAFTExecution",
+            "arn:aws:iam::*:role/BREAKGLASS"
+          ]
+        }
+      }
+    },
+    {
+      "Sid": "DenyRIandSPWriteActions",
+      "Effect": "Deny",
+      "Action": [
+        "ec2:AcceptReservedInstancesExchangeQuote",
+        "ec2:CancelReservedInstancesListing",
+        "ec2:CreateReservedInstancesListing",
+        "ec2:DeleteQueuedReservedInstances",
+        "ec2:ModifyReservedInstances",
+        "ec2:PurchaseReservedInstancesOffering",
+        "elasticache:PurchaseReservedCacheNodesOffering",
+        "es:PurchaseReservedElasticsearchInstanceOffering",
+        "es:PurchaseReservedInstanceOffering",
+        "rds:PurchaseReservedDBInstancesOffering",
+        "redshift:AcceptReservedNodeExchange",
+        "redshift:PurchaseReservedNodeOffering",
+        "savingsplans:CreateSavingsPlan",
+        "savingsplans:DeleteQueuedSavingsPlan",
+        "savingsplans:TagResource",
+        "savingsplans:UntagResource"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "SecHubProtect",
+      "Effect": "Deny",
+      "Action": [
+        "securityhub:BatchDisableStandards",
+        "securityhub:BatchEnableStandards",
+        "securityhub:BatchUpdateStandardsControlAssociations",
+        "securityhub:DeleteInsight",
+        "securityhub:DisableSecurityHub",
+        "securityhub:DisassociateFromAdministratorAccount",
+        "securityhub:EnableSecurityHub",
+        "securityhub:UpdateOrganizationConfiguration",
+        "securityhub:UpdateSecurityHubConfiguration",
+        "securityhub:UpdateStandardsControl"
+      ],
+      "Resource": "*",
+      "Condition": {
+        "StringNotLike": {
+          "aws:PrincipalArn": [
+            "arn:aws:iam::*:role/AWSControlTowerExecution",
+            "arn:aws:iam::*:role/AWSAFTExecution",
+            "arn:aws:iam::*:role/SecurityHubEnabler"
+          ]
+        }
+      }
+    },
+    {
+      "Sid": "EventBridgeProtect",
+      "Effect": "Deny",
+      "Action": [
+        "events:DeleteRule",
+        "events:DisableRule",
+        "events:RemoveTargets"
+      ],
+      "Resource": [
+        "arn:aws:events:us-east-1:*:rule/SecurityHubSummaryEmailSchedule"
+      ],
+      "Condition": {
+        "StringNotLike": {
+          "aws:PrincipalArn": [
+            "arn:aws:iam::*:role/AWSControlTowerExecution",
+            "arn:aws:iam::*:role/AWSAFTExecution"
+          ]
+        }
+      }
+    },
+    {
+      "Sid": "LambdaProtect",
+      "Effect": "Deny",
+      "Action": [
+        "lambda:DeleteFunction",
+        "lambda:UpdateFunctionCode"
+      ],
+      "Resource": [
+        "arn:aws:lambda:us-east-1:*:function:SendSecurityHubSummaryEmail"
+      ],
+      "Condition": {
+        "StringNotLike": {
+          "aws:PrincipalArn": [
+            "arn:aws:iam::*:role/AWSControlTowerExecution",
+            "arn:aws:iam::*:role/AWSAFTExecution"
+          ]
+        }
+      }
+    },
+    {
+      "Sid": "DenyKMSKeyDeleteLessThanThirty",
+      "Action": [
+        "kms:ScheduleKeyDeletion"
+      ],
+      "Effect": "Deny",
+      "Resource": "arn:aws:kms:*:*:*",
+      "Condition": {
+        "NumericLessThanEquals": {
+          "kms:ScheduleKeyDeletionPendingWindowInDays": "29"
+        }
+      }
+    },
+    {
+      "Sid": "DenySimpleAD",
+      "Action": [
+        "ds:CreateDirectory"
+      ],
+      "Effect": "Deny",
+      "Resource": "arn:aws:ds:*:*:*"
+    },
+    {
+      "Sid": "FIESTA1263DenyExtSharing",
+      "Action": [
+        "ram:CreateResourceShare",
+        "ram:UpdateResourceShare"
+      ],
+      "Effect": "Deny",
+      "Resource": "*",
+      "Condition": {
+        "Bool": {
+          "ram:RequestedAllowsExternalPrincipals": "true"
+        }
+      }
+    }
+  ]
+}

@@ -12,6 +12,39 @@ output "caller_user" {
   value = data.aws_caller_identity.current.user_id
 }
 
+#############################
+
+# resource "aws_organizations_organizational_unit" "sandbox_whitelist" {
+#   name = "Sandbox-Whitelist"
+#   #  parent_id = data.aws_ssm_parameter.sandbox_ou.value
+#   parent_id = "r-xg04"
+# }
+
+
+# resource "aws_organizations_policy" "sandbox_whitelist_1" {
+#   name        = "sandbox-whitelist-1"
+#   description = "Sandbox Whitelist SCP1"
+#   content     = file("policies/scp/sandbox-whitelist-ou-scp1.json")
+# }
+
+# resource "aws_organizations_policy_attachment" "sandbox_whitelist_attachment_1" {
+#   policy_id = aws_organizations_policy.sandbox_whitelist_1.id
+#   target_id = aws_organizations_organizational_unit.sandbox_whitelist.id
+# }
+
+
+# resource "aws_organizations_policy" "sandbox_whitelist_2" {
+#   name        = "sandbox-whitelist-2"
+#   description = "Sandbox Whitelist SCP2"
+#   content     = file("policies/scp/sandbox-whitelist-ou-scp2.json")
+# }
+
+# resource "aws_organizations_policy_attachment" "sandbox_whitelist_attachment_2" {
+#   policy_id = aws_organizations_policy.sandbox_whitelist_2.id
+#   target_id = aws_organizations_organizational_unit.sandbox_whitelist.id
+# }
+
+
 
 # resource "null_resource" "test" {
 #   depends_on = [aws_organizations_policy_attachment.sandbox_whitelist_attachment_1,
@@ -22,30 +55,14 @@ output "caller_user" {
 #   }
 # }
 
-#        --role-arn "arn:aws:iam::195094525803:role/AWSAFTExecution" \
 
-resource "null_resource" "assume_role_command7" {
+resource "null_resource" "example1" {
   provisioner "local-exec" {
     environment = {
-      CALLER_ARN = data.aws_caller_identity.current.arn
+      AWS_PROFILE=aft-target
     }
-    command = <<EOF
-      # echo "Vended exec role arn: $VENDED_EXEC_ROLE_ARN"
-      # echo "Caller ARN: $CALLER_ARN"
-      # env
-      # temp_role="$(aws sts assume-role \
-      #   --role-arn "$VENDED_EXEC_ROLE_ARN" \
-      #   --role-session-name "terraform-session-null-exec" \
-      #   --query 'Credentials.[AccessKeyId,SecretAccessKey,SessionToken]' \
-      #   --output text)"
-
-      # read AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN <<< $temp_role
-      # export AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN
-
-      aws --profile aft-target sts get-caller-identity
-      # unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN temp_role
-    EOF
-
+    
     interpreter = ["/bin/bash", "-c"]
+    command = "aws sts get-caller-identity"
   }
 }

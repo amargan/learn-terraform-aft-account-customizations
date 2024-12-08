@@ -1,0 +1,137 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "HAP91DenyRAMExtInvite",
+      "Action": "ram:AcceptResourceShareInvitation",
+      "Effect": "Deny",
+      "Resource": "*",
+      "Condition": {
+        "Bool": {
+          "aws:ViaAWSService": "false"
+        }
+      }
+    },
+    {
+      "Sid": "FIESTA1265DenyRAMOrg",
+      "Action": [
+        "ram:AssociateResourceShare",
+        "ram:CreateResourceShare"
+      ],
+      "Effect": "Deny",
+      "Resource": "*",
+      "Condition": {
+        "StringLike": {
+          "ram:Principal": [
+            "arn:aws:organizations::*:organization/*",
+            "arn:aws:organizations::*:ou/*"
+          ]
+        }
+      }
+    },
+    {
+      "Sid": "SNSProtect",
+      "Effect": "Deny",
+      "Action": "sns:DeleteTopic",
+      "Resource": [
+        "arn:aws:sns:us-east-1:*:SecurityHubRecurringSummary"
+      ],
+      "Condition": {
+        "StringNotLike": {
+          "aws:PrincipalArn": [
+            "arn:aws:iam::*:role/AWSControlTowerExecution",
+            "arn:aws:iam::*:role/AWSAFTExecution"
+          ]
+        }
+      }
+    },
+    {
+      "Condition": {
+        "ArnNotLike": {
+          "aws:PrincipalARN": "arn:aws:iam::*:role/AWSAFTExecution"
+        }
+      },
+      "Action": [
+        "account:CloseAccount",
+        "account:DeleteAlternateContact",
+        "account:PutAlternateContact",
+        "account:PutChallengeQuestions",
+        "account:PutContactInformation",
+        "artifact:TerminateAgreement"
+      ],
+      "Resource": [
+        "*"
+      ],
+      "Effect": "Deny",
+      "Sid": "DenyUpdateAccountExceptAFT"
+    },
+    {
+      "Sid": "HSPManagedR53zone",
+      "Effect": "Deny",
+      "Action": [
+        "route53:ChangeResourceRecordSets",
+        "route53:CreateHostedZone",
+        "route53:DeleteHostedZone"
+      ],
+      "Resource": "arn:aws:route53:::hostedzone/*",
+      "Condition": {
+        "ForAllValues:StringLike": {
+          "route53:ChangeResourceRecordSetsNormalizedRecordNames": [
+            "*hsp.philips.com"
+          ]
+        },
+        "StringEquals": {
+          "route53:ChangeResourceRecordSetsRecordTypes": [
+            "SOA",
+            "NS"
+          ]
+        },
+        "ArnNotLike": {
+          "aws:PrincipalARN": [
+            "arn:aws:iam::*:role/AWSAFTExecution",
+            "arn:aws:iam::*:role/aft-apply-eks"
+          ]
+        }
+      }
+    },
+    {
+      "Sid": "HAP206DenyTranscribeWoCMK",
+      "Effect": "Deny",
+      "Action": [
+        "transcribe:StartCallAnalyticsJob",
+        "transcribe:StartMedicalScribeJob",
+        "transcribe:StartMedicalTranscriptionJob",
+        "transcribe:StartTranscriptionJob"
+      ],
+      "Resource": "*",
+      "Condition": {
+        "Null": {
+          "transcribe:OutputEncryptionKMSKeyId": "true"
+        }
+      }
+    },
+    {
+      "Sid": "ProtectTFstate",
+      "Effect": "Deny",
+      "Action": [
+        "s3:DeleteObject",
+        "s3:DeleteObjectVersion"
+      ],
+      "Resource": [
+        "arn:aws:s3:::tf-s3-backend-*/github.com/philips-internal/aft*",
+        "arn:aws:s3:::tf-s3-backend-*/github.com/philips-internal/hsp*",
+        "arn:aws:s3:::tf-s3-backend-*/github.com/philips-internal/hap*"
+      ],
+      "Condition": {
+        "ForAllValues:ArnNotLike": {
+          "aws:PrincipalArn": [
+            "arn:aws:iam::*:role/AWSAFTExecution",
+            "arn:aws:iam::*:role/github-actions/aft-deploy-custom-guardrails",
+            "arn:aws:iam::*:role/github-actions/aft-hsp-aws-platform-gh-oidc",
+            "arn:aws:iam::*:role/github-actions/hsp-aws-platform-*"
+          ]
+        }
+      }
+    }
+  ]
+}

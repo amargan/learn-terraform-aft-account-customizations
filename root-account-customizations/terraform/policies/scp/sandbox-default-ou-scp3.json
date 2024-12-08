@@ -1,0 +1,140 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Condition": {
+        "StringEquals": {
+          "aws:ResourceTag/hsp": "managed-by-hsp"
+        },
+        "ForAllValues:ArnNotLike": {
+          "aws:PrincipalArn": [
+            "arn:aws:iam::*:role/AWSAFTExecution",
+            "arn:aws:iam::*:role/github-actions/aft-deploy-custom-guardrails",
+            "arn:aws:iam::*:role/github-actions/aft-hsp-aws-platform-gh-oidc",
+            "arn:aws:iam::*:role/github-actions/hsp-aws-platform-*",
+            "arn:aws:iam::315773391160:role/aws-reserved/sso.amazonaws.com/AWSReservedSSO_AWSAdministratorAccess_*",
+            "arn:aws:iam::875566264904:role/aws-reserved/sso.amazonaws.com/AWSReservedSSO_AWSAdministratorAccess_*",
+            "arn:aws:iam::892239858235:role/aws-reserved/sso.amazonaws.com/AWSReservedSSO_AWSAdministratorAccess_*"
+          ]
+        }
+      },
+      "Action": [
+        "config:DeleteConfigRule",
+        "config:DeleteConfigurationAggregator",
+        "config:DeleteEvaluationResults",
+        "config:PutConfigRule",
+        "config:PutConfigurationAggregator",
+        "config:TagResource",
+        "config:UntagResource",
+        "events:Delete*",
+        "events:Disable*",
+        "events:Enable*",
+        "events:Put*",
+        "events:Remove*",
+        "iam:AttachRolePolicy",
+        "iam:DeleteRole",
+        "iam:DeleteRolePermissionsBoundary",
+        "iam:DeleteRolePolicy",
+        "iam:DetachRolePolicy",
+        "iam:PutRolePermissionsBoundary",
+        "iam:PutRolePolicy",
+        "iam:TagRole",
+        "iam:UntagRole",
+        "iam:UpdateAssumeRolePolicy",
+        "iam:UpdateRole",
+        "iam:UpdateRoleDescription",
+        "kms:Delete*",
+        "kms:ScheduleKeyDeletion",
+        "lambda:AddLayerVersionPermission",
+        "lambda:AddPermission",
+        "lambda:CreateAlias",
+        "lambda:CreateEventSourceMapping",
+        "lambda:CreateFunction",
+        "lambda:DeleteAlias",
+        "lambda:DeleteEventSourceMapping",
+        "lambda:DeleteFunction",
+        "lambda:DeleteFunctionConcurrency",
+        "lambda:DeleteFunctionEventInvokeConfig",
+        "lambda:DeleteLayerVersion",
+        "lambda:DeleteProvisionedConcurrencyConfig",
+        "lambda:DisableReplication",
+        "lambda:EnableReplication",
+        "lambda:PublishLayerVersion",
+        "lambda:PublishVersion",
+        "lambda:PutFunctionConcurrency",
+        "lambda:PutFunctionEventInvokeConfig",
+        "lambda:PutProvisionedConcurrencyConfig",
+        "lambda:RemoveLayerVersionPermission",
+        "lambda:RemovePermission",
+        "lambda:TagResource",
+        "lambda:UntagResource",
+        "lambda:UpdateAlias",
+        "lambda:UpdateEventSourceMapping",
+        "lambda:UpdateFunctionCode",
+        "lambda:UpdateFunctionConfiguration",
+        "lambda:UpdateFunctionEventInvokeConfig"
+      ],
+      "Resource": [
+        "*"
+      ],
+      "Effect": "Deny",
+      "Sid": "DenyHSPManagedResources"
+    },
+    {
+      "Sid": "ProtectStacks",
+      "Effect": "Deny",
+      "Action": [
+        "cloudformation:CreateChangeSet",
+        "cloudformation:CreateStack",
+        "cloudformation:DeleteStack",
+        "cloudformation:SetStackPolicy",
+        "cloudformation:UpdateStack",
+        "cloudformation:UpdateTerminationProtection"
+      ],
+      "Resource": [
+        "arn:aws:cloudformation:*:*:stack/StackSet-AWSControlTower*/*",
+        "arn:aws:cloudformation:*:*:stack/StackSet-StackSet-*-OptimizationDataRole*/*"
+      ],
+      "Condition": {
+        "ForAllValues:ArnNotLike": {
+          "aws:PrincipalArn": [
+            "arn:aws:iam::*:role/AWSControlTowerExecution",
+            "arn:aws:iam::*:role/stacksets-exec-*"
+          ]
+        }
+      }
+    },
+    {
+      "Sid": "ProtectRolesByName",
+      "Effect": "Deny",
+      "Action": [
+        "iam:AttachRolePolicy",
+        "iam:DeleteRole",
+        "iam:DeleteRolePermissionsBoundary",
+        "iam:DeleteRolePolicy",
+        "iam:DetachRolePolicy",
+        "iam:PutRolePermissionsBoundary",
+        "iam:PutRolePolicy",
+        "iam:TagRole",
+        "iam:UntagRole",
+        "iam:UpdateAssumeRolePolicy",
+        "iam:UpdateRole",
+        "iam:UpdateRoleDescription"
+      ],
+      "Resource": [
+        "arn:aws:iam::*:role/AWSAFT*",
+        "arn:aws:iam::*:role/stacksets-exec-*",
+        "arn:aws:iam::*:role/CID-DC-Optimization-Data-Multi-Account-Role"
+      ],
+      "Condition": {
+        "ForAllValues:ArnNotLike": {
+          "aws:PrincipalArn": [
+            "arn:aws:iam::*:role/AWSControlTowerExecution",
+            "arn:aws:iam::*:role/aws-service-role/member.org.stacksets.cloudformation.amazonaws.com/AWSServiceRoleForCloudFormationStackSetsOrgMember",
+            "arn:aws:iam::*:role/stacksets-exec-*"
+          ]
+        }
+      }
+    }
+  ]
+}
