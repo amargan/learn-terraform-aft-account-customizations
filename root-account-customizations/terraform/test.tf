@@ -40,17 +40,6 @@ resource "aws_organizations_policy_attachment" "sandbox_whitelist_attachment_1" 
     command     = "aws organizations detach-policy --policy-id p-FullAWSAccess --target-id $target_ou_id"
   }
 
-  provisioner "local-exec" {
-    when = destroy
-    environment = {
-      AWS_PROFILE  = "aft-target"
-      target_ou_id = aws_organizations_organizational_unit.sandbox_whitelist.id
-    }
-
-    interpreter = ["/bin/bash", "-c"]
-    command     = "aws organizations attach-policy --policy-id p-FullAWSAccess --target-id $target_ou_id"
-  }
-
 }
 
 
