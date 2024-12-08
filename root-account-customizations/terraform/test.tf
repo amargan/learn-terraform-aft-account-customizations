@@ -40,6 +40,18 @@ resource "aws_organizations_policy_attachment" "sandbox_whitelist_attachment_1" 
     command     = "aws organizations detach-policy --policy-id p-FullAWSAccess --target-id $target_ou_id"
   }
 
+  provisioner "local-exec" {
+    when = "destroy"
+
+    environment = {
+      AWS_PROFILE  = "aft-target"
+      target_ou_id = "ou-xg04-2moiegb6"
+    }
+
+    interpreter = ["/bin/bash", "-c"]
+    command     = "aws organizations attach-policy --policy-id p-FullAWSAccess --target-id $target_ou_id"
+  }
+
 }
 
 
@@ -50,47 +62,12 @@ resource "aws_organizations_policy" "sandbox_whitelist_2" {
 }
 
 resource "aws_organizations_policy_attachment" "sandbox_whitelist_attachment_2" {
+  depends_on = [
+    aws_organizations_policy_attachment.sandbox_whitelist_attachment_1
+  ]
   policy_id = aws_organizations_policy.sandbox_whitelist_2.id
   target_id = aws_organizations_organizational_unit.sandbox_whitelist.id
 }
-
-
-
-
-# resource "null_resource" "example2" {
-#   depends_on = [
-#     aws_organizations_policy_attachment.sandbox_whitelist_attachment_1,
-#     aws_organizations_policy_attachment.sandbox_whitelist_attachment_2
-#   ]
-
-#   provisioner "local-exec" {
-#     environment = {
-#       AWS_PROFILE  = "aft-target"
-#       target_ou_id = aws_organizations_organizational_unit.sandbox_whitelist.id
-#     }
-
-#     interpreter = ["/bin/bash", "-c"]
-#     command     = "aws organizations detach-policy --policy-id p-FullAWSAccess --target-id $target_ou_id"
-#   }
-# }
-
-# resource "null_resource" "example-destroy" {
-#   depends_on = [
-#     aws_organizations_policy_attachment.sandbox_whitelist_attachment_1,
-#     aws_organizations_policy_attachment.sandbox_whitelist_attachment_2
-#   ]
-
-
-#   provisioner "local-exec" {
-#     environment = {
-#       AWS_PROFILE  = "aft-target"
-#       target_ou_id = aws_organizations_organizational_unit.sandbox_whitelist.id
-#     }
-
-#     interpreter = ["/bin/bash", "-c"]
-#     command     = "aws organizations detach-policy --policy-id p-FullAWSAccess --target-id $target_ou_id"
-#   }
-# }
 
 
 
